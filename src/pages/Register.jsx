@@ -1,38 +1,23 @@
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthProvider";
 import { updateProfile } from "firebase/auth";
+import { isStrongPassword, validateEmail } from "../utilities/inputvalidation";
+import { FaRegEye, FaRegEyeSlash } from "react-icons/fa6";
 
 const Register = () => {
   const { createUser, signUpWithGoogle, signUpWithFacebook, signUpWithGithub } =
     useContext(AuthContext);
+  const [isPassword, setIsPassword] = useState(true);
   const navigate = useNavigate();
 
-  // function handleRegister(e) {
-  //   e.preventDefault();
-  //   // const displayName = e.target.displayName.value;
-  //   const email = e.target.email.value;
-  //   const password = e.target.password.value;
-
-  //   createUser(email, password)
-  //     .then((result) => {
-  //       if (result.user) {
-  //         console.log(result.user);
-  //         console.log(auth.currentUser);
-  //         e.target.reset();
-  //         navigate("/");
-  //       }
-  //     })
-  //     .catch((error) => console.error(error.message));
-  // }
-
-  // User Register with eamil and password
+  // register user with email and password
   async function handleRegister(e) {
     e.preventDefault();
     const displayName = e.target.displayName.value;
     const email = e.target.email.value;
     const pass = e.target.password.value;
-
+    console.log(validateEmail(email), isStrongPassword(pass));
     const result = await createUser(email, pass);
     await updateProfile(result.user, {
       displayName: displayName,
@@ -41,7 +26,7 @@ const Register = () => {
     navigate("/");
   }
 
-  // sign up with google
+  // register user with google
   function handleSignUpWithGoogle() {
     signUpWithGoogle()
       .then((result) => {
@@ -51,17 +36,18 @@ const Register = () => {
       .catch((error) => console.error(error.message));
   }
 
-  // sign up with facebook
+  // register user with facebook
   function handleSignUpWithFacebook() {
     signUpWithFacebook();
   }
 
-  // sign up with twitter
+  // register user with Github
   async function handleSignUpWithGitHub() {
     const result = await signUpWithGithub();
 
     console.log(result.user);
   }
+
   return (
     <div className="card mt-6 py-5 shrink-0 w-full max-w-sm mx-auto shadow-2xl bg-base-100">
       <h3 className="text-center text-2xl font-bold">Register now</h3>
@@ -73,7 +59,7 @@ const Register = () => {
           <input
             name="displayName"
             type="text"
-            placeholder="display name"
+            placeholder="Display name"
             className="input input-bordered"
             required
           />
@@ -85,7 +71,7 @@ const Register = () => {
           <input
             name="email"
             type="email"
-            placeholder="email"
+            placeholder="Email"
             className="input input-bordered"
             required
           />
@@ -94,13 +80,19 @@ const Register = () => {
           <label className="label">
             <span className="label-text">Password</span>
           </label>
-          <input
-            name="password"
-            type="password"
-            placeholder="password"
-            className="input input-bordered"
-            required
-          />
+          <label className="input input-bordered flex items-center gap-2">
+            <input
+              type={isPassword ? "password" : "text"}
+              name="password"
+              placeholder="Password"
+              minLength="8"
+              required
+              className="grow"
+            />
+            <span onClick={() => setIsPassword(!isPassword)}>
+              {!isPassword ? <FaRegEye /> : <FaRegEyeSlash />}
+            </span>
+          </label>
           <label className="label">
             <a href="#" className="label-text-alt link link-hover">
               Forgot password?
